@@ -29,6 +29,9 @@ fiscal-svar-replication/
 ├── install_packages.R (optional)
 ├── README.md
 │
+├── TablesAndGraphs/
+│   └── (Replications of the original paper’s tables and figures)
+│
 └── Aux_files/
     ├── functions.R
     ├── makeInstData.R
@@ -55,6 +58,17 @@ The file `data.csv` contains the following variables:
 5. **T90_MMO**: instrument for tax revenue shocks (Mertens and Montiel Olea, 2018)
 6. **TFPSHK_FRBNY_P**: instrument for non-fiscal shocks (NY Fed DSGE model)
 7. **TBILL3**: interest rate on three-month Treasury bills
+
+---
+
+## 📁 Additional Folder: TablesAndGraphs
+
+The folder `TablesAndGraphs/` contains the replication outputs corresponding to the original paper’s results. Specifically, it includes:
+
+* Replicated tables presented in the paper
+* Replicated figures (e.g., impulse response functions and related plots)
+
+This folder is intended to provide a direct comparison between the reproduced results and those reported by the authors.
 
 ---
 
