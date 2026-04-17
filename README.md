@@ -1,6 +1,6 @@
-# Fiscal SVAR Replication
+# Fiscal SVAR: Replication and Sensitivity Analysis
 
-This repository replicates the results from:
+This repository replicates and extends the results from:
 
 **Gregory, McNeil, and Smith (2023)**
 *“US Fiscal Policy Shocks: Proxy-SVAR Overidentification via GMM”*
@@ -9,12 +9,72 @@ This repository replicates the results from:
 
 ## 📌 Overview
 
-This project reproduces the main empirical results and Monte Carlo experiments from the paper. The authors study fiscal policy shocks in the United States using a structural VAR (SVAR) identified with external instruments, and propose an extension using GMM that imposes orthogonality (uncorrelated shocks).
+This project combines **replication** and **original empirical analysis** of fiscal shock identification using Proxy-SVAR methods.
 
-The repository includes:
+* First, it replicates the main empirical results and Monte Carlo experiments from the original paper.
+* Second, it introduces a **design-based sensitivity analysis** to evaluate how estimation results change across different empirical environments.
 
-* Replication of the empirical application (impulse responses, multipliers, tables, figures)
-* Replication of the Monte Carlo simulations used in the paper
+The core focus is to compare:
+
+* **Just-identified IV (Proxy-SVAR)**
+* **Overidentified GMM (with covariance restrictions)**
+* **Local Projections (LP-IV)**
+
+The results show that **GMM improves statistical precision and stabilizes estimates**, especially under weak instruments.
+
+---
+
+## ✨ Original Contribution
+
+Beyond replication, this repository includes several extensions:
+
+### 1. Sensitivity to Instrument Quality
+
+Three scenarios are analyzed:
+
+* **Baseline**: original instruments
+* **Trimmed**: instruments set to missing before 1980
+* **Noisy**: instruments contaminated with Gaussian noise
+
+This allows a controlled evaluation of **weak identification**.
+
+---
+
+### 2. Efficiency Analysis (IV vs GMM)
+
+The project computes **relative efficiency gains**:
+
+[
+Gain = \frac{SE_{IV} - SE_{GMM}}{SE_{IV}}
+]
+
+Findings:
+
+* Gains are **larger for government spending shocks**
+* Gains **increase when instruments weaken**
+* GMM acts as a **stabilizing estimator**
+
+---
+
+### 3. Local Projections Comparison (LP-IV)
+
+An alternative estimation using **local projections** is implemented.
+
+Result:
+
+* Similar point estimates
+* **Much wider confidence intervals** → loss of precision
+
+---
+
+### 4. Meta-Regression
+
+A simple meta-analysis relates efficiency gains to:
+
+* Type of shock (spending vs taxes)
+* Instrument quality (trimmed / noisy)
+
+This provides a structured summary of the sensitivity results.
 
 ---
 
@@ -23,14 +83,16 @@ The repository includes:
 ```
 fiscal-svar-replication/
 │
-├── main.R
-├── monteCarlo.R
+├── main.R                      # Original replication
+├── main_analysis.R             # Baseline + LP + IV vs GMM comparison
+├── stress_test_analysis.R      # Sensitivity (baseline / trim / noise)
+├── monteCarlo.R                # Monte Carlo simulations
 ├── data.csv
 ├── install_packages.R (optional)
 ├── README.md
 │
 ├── TablesAndGraphs/
-│   └── (Replications of the original paper’s tables and figures)
+│   └── (Replication outputs: tables and figures)
 │
 └── Aux_files/
     ├── functions.R
@@ -49,32 +111,21 @@ fiscal-svar-replication/
 
 ## 📊 Data
 
-The file `data.csv` contains the following variables:
+The dataset includes:
 
-1. **Y**: log of real per capita GDP
-2. **G**: log of real per capita federal government spending
-3. **T**: log of real per capita federal tax revenue
-4. **GSHK_R**: instrument for government spending shocks (Ramey and Zubairy, 2018)
-5. **T90_MMO**: instrument for tax revenue shocks (Mertens and Montiel Olea, 2018)
-6. **TFPSHK_FRBNY_P**: instrument for non-fiscal shocks (NY Fed DSGE model)
-7. **TBILL3**: interest rate on three-month Treasury bills
-
----
-
-## 📁 Additional Folder: TablesAndGraphs
-
-The folder `TablesAndGraphs/` contains the replication outputs corresponding to the original paper’s results. Specifically, it includes:
-
-* Replicated tables presented in the paper
-* Replicated figures (e.g., impulse response functions and related plots)
-
-This folder is intended to provide a direct comparison between the reproduced results and those reported by the authors.
+* **Y**: log real GDP per capita
+* **G**: log government spending per capita
+* **T**: log tax revenue per capita
+* **GSHK_R**: spending shock instrument (Ramey & Zubairy)
+* **T90_MMO**: tax instrument (Mertens & Montiel Olea)
+* **TFP shock**: FRBNY DSGE-based instrument
+* **TBILL3**: short-term interest rate
 
 ---
 
 ## ⚙️ Requirements
 
-Before running the code, install the required R packages:
+Required R packages:
 
 ```
 xts, pracma, readxl, vars, MASS, matrixcalc, dynlm, gmm,
@@ -82,7 +133,7 @@ ggplot2, scales, gridExtra, AER, expm, gdata, cowplot,
 sandwich, lmtest, latex2exp, forcats
 ```
 
-You can optionally run:
+Optional:
 
 ```r
 source("install_packages.R")
@@ -92,80 +143,94 @@ source("install_packages.R")
 
 ## ▶️ How to Run
 
-### 1. Set working directory
-
-Make sure your working directory is the root of the repository:
-
-```r
-setwd("path/to/fiscal-svar-replication")
-```
-
----
-
-### 2. Run empirical replication
+### 1. Replication
 
 ```r
 source("main.R")
 ```
 
-This will:
+---
 
-* Estimate the SVAR
-* Compute impulse response functions (IRFs)
-* Generate fiscal multipliers
-* Reproduce tables and figures from the paper
+### 2. Main Analysis (Recommended)
+
+```r
+source("main_analysis.R")
+```
+
+This script:
+
+* Replicates baseline results
+* Compares IV vs GMM
+* Implements LP-IV
+* Produces comparison tables and plots
 
 ---
 
-### 3. Run Monte Carlo simulations
+### 3. Sensitivity / Stress Test
+
+```r
+source("stress_test_analysis.R")
+```
+
+This script:
+
+* Runs **baseline / trimmed / noisy** scenarios
+* Computes first-stage strength
+* Evaluates efficiency gains
+* Generates summary tables and plots
+
+---
+
+### 4. Monte Carlo
 
 ```r
 source("monteCarlo.R")
 ```
 
-This will:
-
-* Simulate data according to the paper’s DGP
-* Estimate SVAR models under different identification strategies
-* Reproduce the distributions shown in Figure 2
-
 ---
 
-## ⚠️ Important Note on Monte Carlo Simulations
+## ⚠️ Monte Carlo Note
 
-In this repository, the parameter:
+Default:
 
 ```r
 mc = 5
 ```
 
-was used in `monteCarlo.R` to reduce computation time during testing.
-
-However, the authors use:
+Paper:
 
 ```r
 mc = 5000
 ```
 
-Running the simulation with `mc = 5000` fully reproduces the results and figures reported in the paper. The smaller value is only for faster execution.
+Use higher values for full replication (computationally intensive).
+
+---
+
+## 📄 Project Write-Up
+
+The full project write-up is included in this repository and provides:
+
+* Model derivation
+* Data description
+* Empirical design
+* Results and interpretation
+
+Main finding:
+
+> Overidentification via GMM improves precision without altering point estimates and plays a key stabilizing role under weak identification.
 
 ---
 
 ## 🧠 Notes
 
-* All file paths were converted to **relative paths** to ensure reproducibility across different systems.
-* The code relies on auxiliary scripts in the `Aux_files/` directory provided by the authors.
-* Monte Carlo simulations can be computationally intensive depending on the number of replications.
+* All paths should be set to **relative paths** for portability
+* Some auxiliary functions come from the original authors
+* Sensitivity analysis is implemented independently
 
 ---
 
 ## 📚 Reference
 
-Gregory, A. W., McNeil, J., & Smith, G. W. (2023).
+Gregory, A. W., McNeil, J., & Smith, G. W. (2023)
 *US Fiscal Policy Shocks: Proxy-SVAR Overidentification via GMM*
-
----
-
-## 👨‍💻 Author
-
-Replication conducted as part of a course project.
